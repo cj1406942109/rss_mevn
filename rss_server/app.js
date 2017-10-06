@@ -6,8 +6,29 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var cors = require('cors');
 
-var index = require('./routes/index');
+var mongoose = require('mongoose');
+var config = require('./config');
+
+// var index = require('./routes/index');
 var users = require('./routes/users');
+
+//连接数据库
+mongoose.connect(config.db, { useMongoClient: true });
+
+//测试用
+var db = mongoose.connection;
+//连接成功
+db.on('connected', function() {
+    console.log('Mongoose connection open to ' + config.db);
+});
+//连接异常
+db.on('error', function(err) {
+    console.log('Mongoose connection error: ' + err);
+});
+//连接断开
+db.on('disconnected', function() {
+    console.log('Mongoose connection disconnected');
+});
 
 var app = express();
 
@@ -29,25 +50,25 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', index);
-app.use('/users', users);
+// app.use('/', index);
+app.use('/', users);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  var err = new Error('Not Found');
-  err.status = 404;
-  next(err);
+    var err = new Error('Not Found');
+    err.status = 404;
+    next(err);
 });
 
 // error handler
 app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+    // set locals, only providing error in development
+    res.locals.message = err.message;
+    res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+    // render the error page
+    res.status(err.status || 500);
+    res.render('error');
 });
 
 module.exports = app;
