@@ -7,7 +7,13 @@ const STATUS_OK = 1;
 
 //根据用户id获取所有读后感
 router.post('/findAllReviews', function(req, res, next) {
-    Review.find({ user_id: req.body.user_id })
+    var queryObject = { user_id: req.body.user_id };
+    if(req.body.type=='all'){
+        
+    }else if(req.body.type == 'like'){
+        queryObject = { user_id: req.body.user_id, is_like: true };
+    }
+    Review.find(queryObject)
         .sort({ post_date: -1 })
         .then(reviews => {
             res.json({
