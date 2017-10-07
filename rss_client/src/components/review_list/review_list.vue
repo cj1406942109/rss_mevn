@@ -1,23 +1,43 @@
 <template>
-  <div class="review_list">
+  <div class="review-list">
       <div class="row">
-          <div class="col-md-3">
+          <div class="alert" role="alert" :class="[submitSuccess?'alert-success':'alert-danger']" v-show="showAlert">
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close" @click="hideAlert"><span aria-hidden="true">&times;</span></button>
+              {{alertMessage}}
+          </div>
+          <div class="col-md-3 affix">
               <h3>读后感</h3>
               <ul>
                   <li @click="switchContent(index, menuItem.value)" v-for="(menuItem, index) in sidemenu" :key="menuItem.id" :class="{active:activeMenu==index}">{{menuItem.title}}</li>                  
               </ul>
           </div>
-          <div class="col-md-9">
-              <ul v-show="!submitStatus">
-                  <li></li>
-                  <li></li>
-                  <li></li>
-                  <li></li>
-                  <li></li>
-                  <li></li>
-                  <li></li>
+          <div class="col-md-9 col-md-offset-3" ref="reviewWrapper">
+              <ul v-show="!submitPage && review_list && review_list.length > 0">
+                  <li v-for="review in review_list" :key="review.id" class="review-item">
+                      <div class="title">
+                          <span>{{review.title}}</span>                          
+                      </div>
+                      <div class="tags">
+                          <span class="glyphicon glyphicon-tags"></span>
+                          <span>{{review.article.sources}}</span>
+                          <span>{{review.article.classifications}}</span>
+                      </div>
+                      <div class="article">
+                          <span><strong>文章：</strong>{{review.article.title}}</span>
+                          <span><strong>作者：</strong>{{review.article.author}}</span>
+                          <span v-if="review.article.link"><a :href="review.article.link">查看原文</a></span>
+                      </div>
+                      <div class="content">
+                          <p>{{review.content}}</p>
+                      </div>
+                      <div class="time text-right">
+                          <span class="glyphicon glyphicon-time"></span>
+                          <span>{{review.post_date | dateFormat}}</span>
+                      </div>
+                  </li>
               </ul>
-              <div class="review_form" v-show="submitStatus">
+              <div class="alert alert-info" style="margin-top:100px" role="alert" v-show="!submitPage && (!review_list || review_list.length==0)"><strong>暂无数据显示！</strong>你可以先提交读后感！</div>
+              <div class="review_form" v-show="submitPage">
                   <div class="article-wrapper">
                       <h4>我的阅读</h4>
                       <form class="form-horizontal">
@@ -92,7 +112,7 @@
                           <div class="form-group">
                             <label class="col-md-2 control-label"></label>
                             <div class="col-md-8 text-right">
-                                <button class="btn btn-primary" type="button">提交</button>
+                                <button class="btn btn-primary" type="button" :disabled="!formValid" @click="submit">提交</button>
                             </div>
                           </div>
                       </form>
@@ -104,12 +124,27 @@
 </template>
 
 <script>
-import BScroll from 'better-scroll';
+// import BScroll from 'better-scroll';
+import moment from 'moment';
 import config from '@/config';
-
 export default {
     data() {
         return {
+            empty_review: {
+                title: '', //读后感标题
+                content: '', //读后感内容
+                article: { //文章
+                    title: '', //文章标题
+                    author: '', //作者
+                    link: '', //链接地址
+                    content: '', //文章内容
+                    sources: '', //文章来源
+                    classifications: '' //文章分类
+                },
+                is_like: '', //是否推荐
+                is_new: true,
+                user_id: '' //用户id
+            },
             review: {
                 title: '', //读后感标题
                 content: '', //读后感内容
@@ -123,7 +158,6 @@ export default {
                 },
                 is_like: '', //是否推荐
                 is_new: true,
-                post_date: '', //发表时间
                 user_id: '' //用户id
             },
             sidemenu: [{
@@ -135,50 +169,89 @@ export default {
             },{
                 title: '提交读后感',
                 value: -1
-            }],            
+            }],
+            review_list: [],            
             sources: ['期刊', '百科', '自媒体'],
             classifications: ['体育', '文化', '游戏', '科技', '财经'],
             activeMenu: 0,          //当前激活的sidemenu下标
             user: '',
-            submitStatus: false     //当前是否为提交状态
+            submitPage: false,     //当前是否为提交页面
+            showAlert: false,
+            alertMessage: '',
+            submitSuccess: false  
+        }
+    },
+    computed: {
+        formValid: function () {            
+            return this.review.article.title && this.review.article.author && this.review.article.sources && this.review.article.classifications && this.review.title && this.review.is_like;
+        }
+    },
+    filters: {
+        dateFormat (value) {
+            return moment().format('YYYY-MM-DD HH:mm:ss') 
         }
     },
     created() {
-        this.switchContent(0, 'all');
-        this.user = JSON.parse(sessionStorage.getItem('user'));        
-    },
+        this.user = JSON.parse(sessionStorage.getItem('user'));                
+        this.switchContent(0, 'all');     
+    },    
     methods: {
         switchContent (i, v) {
             this.activeMenu = i;
             if (v == -1) {
-                this.submitStatus = true;
+                this.submitPage = true;
             } else {
-                this.submitStatus = false;
-                // this.$http.post(config.apiHost+'/findAllReviews', {user_id: this.user._id, type: v}).then(response => {
-
-                //     var data = response.body;
-                //     if(data.status!=1){
-
-                //     }else{
-                        
-                //     }
-                
-                // }, response => {
-                //     // error callback 
-                    
-                // });
+                this.submitPage = false;
+                this.$http.post(config.apiHost+'/findAllReviews', {user_id: this.user._id, type: v}).then(response => {
+                    var data = response.body;
+                    if(data.status!=1){
+                        this.alertMessage = data.message;
+                        this.showAlert = true;
+                    }else{
+                        this.$nextTick(function () {
+                            this.review_list = data.data;                            
+                        })
+                    }                
+                }, response => {
+                    // error callback 
+                    this.alertMessage = '获取数据失败，请稍后重试！';
+                    this.showAlert = true;
+                });
             }
             
+        },
+        submit () {
+            this.review.user_id = this.user._id;
+            this.$http.post(config.apiHost+'/addReview', this.review).then(response => {
+                var data = response.body;
+                this.showAlert = true;
+                this.alertMessage = data.message;
+                if(data.status!=1){
+                    this.submitSuccess = false;
+                }else{
+                    this.submitSuccess = true;
+                    this.review = this.empty_review;
+                    this.switchContent(0, 'all');
+                }
+            
+            }, response => {
+                // error callback 
+                this.alertMessage = "提交失败，请稍微再试！";
+            });
+        },
+        hideAlert () {
+            this.showAlert = false;
         }
     }
 }
 </script>
 
 <style lang="stylus" scoped>
-    .review_list
-        padding 50px 0
+    .review-list
+        padding 20px 0
         .col-md-3
             padding 50px 0 100px
+            background-color #ffffff
             min-height 500px
             h3
                 margin 20px 0
@@ -207,14 +280,57 @@ export default {
                     &:last-child
                         margin-top 50px
                         font-weight bold
-        .col-md-9
+        .col-md-9          
+            background-color #ffffff 
             ul
                 list-style-type none
-                li 
+                padding 0
+                .review-item 
+                    padding 10px 20px
                     margin 20px 0
                     border 1px solid #ccc
                     box-shadow 2px 2px 2px #ccc
-                    min-height 150px
+                    transition 0.5s
+                    cursor pointer
+                    &:hover
+                        border 1px solid #32c5d2                        
+                        transform translateY(-5px)
+                        box-shadow 2px 2px 2px #32c5d2
+                    .title
+                        span
+                            display inline-block
+                            height 40px
+                            font-size 18px
+                            font-weight bold
+                            line-height 40px
+                    .tags
+                        span 
+                            color #999
+                            margin 0 5px
+                            &:first-child
+                                color #32c5d2
+                                margin-right 10px
+                    .article
+                        span
+                            margin 0 5px
+                            a
+                                text-decoration none
+                                color #32c5d2
+                    .content
+                        padding 10px 0 10px 30px
+                        p   
+                            font-size 14px
+                            color #333
+                            white-space nowrap
+                            overflow-x hidden
+                            text-overflow ellipsis
+                    .time
+                        span
+                            color #999
+                            margin 0 5px
+                            &:first-child
+                                font-size 14px
+                                color #32c5d2
             .review_form
                 h4 
                     font-weight bold
@@ -228,6 +344,9 @@ export default {
                     border none
                     outline none
                     background-color #32c5d2
+        .alert
+            margin-bottom 0
+            text-align center
 </style>
 
 
