@@ -30,12 +30,43 @@
                       <div class="content">
                           <p>{{review.content}}</p>
                       </div>
-                      <div class="time text-right">
+                      <div class="time">
                           <span class="glyphicon glyphicon-time"></span>
                           <span>{{review.post_date | dateFormat}}</span>
                       </div>
+                      <button class="btn btn-info" @click="showDetail(review)">查看详情</button>
                   </li>
               </ul>
+              <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myModalLabel">{{detail_review.title}}</h4>
+                        </div>
+                        <div class="modal-body">
+                            <h4>文章信息</h4>
+                            <div class="detail">
+                                <p><label>标题：</label>{{detail_review.article.title}}</p>
+                                <p><label>作者：</label>{{detail_review.article.author}}</p>
+                                <p><label>来源：</label>{{detail_review.article.sources}}</p>
+                                <p><label>分类：</label>{{detail_review.article.classifications}}</p>
+                                <p v-if="detail_review.article.link"><label>原文链接：</label>{{detail_review.article.link}}</p>
+                                <p v-if="detail_review.article.content"><label>文章内容：</label>{{detail_review.article.content}}</p>
+                            </div>
+                            <h4>我的读后感</h4>
+                            <div class="detail">
+                                <p><label v-if="detail_review.is_like==true" class="text-primary">推荐该文章</label><label v-else class="text-danger">不推荐该文章</label></p>
+                                <p v-if="detail_review.content"><label>详细内容：</label>{{detail_review.content}}</p>
+                            </div>
+                        </div>     
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary">编辑</button>
+                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                        </div>                   
+                    </div>
+                </div>
+              </div>
               <div class="alert alert-info" style="margin-top:100px" role="alert" v-show="!submitPage && (!review_list || review_list.length==0)"><strong>暂无数据显示！</strong>你可以先提交读后感！</div>
               <div class="review_form" v-show="submitPage">
                   <div class="article-wrapper">
@@ -129,7 +160,7 @@ import moment from 'moment';
 import config from '@/config';
 export default {
     data() {
-        return {
+        return {            
             empty_review: {
                 title: '', //读后感标题
                 content: '', //读后感内容
@@ -146,6 +177,21 @@ export default {
                 user_id: '' //用户id
             },
             review: {
+                title: '', //读后感标题
+                content: '', //读后感内容
+                article: { //文章
+                    title: '', //文章标题
+                    author: '', //作者
+                    link: '', //链接地址
+                    content: '', //文章内容
+                    sources: '', //文章来源
+                    classifications: '' //文章分类
+                },
+                is_like: '', //是否推荐
+                is_new: true,
+                user_id: '' //用户id
+            },
+            detail_review: {
                 title: '', //读后感标题
                 content: '', //读后感内容
                 article: { //文章
@@ -241,6 +287,11 @@ export default {
         },
         hideAlert () {
             this.showAlert = false;
+        },
+        showDetail (review) {
+            // alert(review.title);
+            this.detail_review = review;
+            $('#myModal').modal('show')
         }
     }
 }
@@ -286,15 +337,15 @@ export default {
                 list-style-type none
                 padding 0
                 .review-item 
+                    position relative
                     padding 10px 20px
                     margin 20px 0
                     border 1px solid #ccc
                     box-shadow 2px 2px 2px #ccc
                     transition 0.5s
-                    cursor pointer
                     &:hover
                         border 1px solid #32c5d2                        
-                        transform translateY(-5px)
+                        transform translateX(10px)
                         box-shadow 2px 2px 2px #32c5d2
                     .title
                         span
@@ -331,6 +382,20 @@ export default {
                             &:first-child
                                 font-size 14px
                                 color #32c5d2
+                    .btn
+                        position absolute
+                        top 15px
+                        right 20px
+            .modal-body
+                h4
+                    margin 20px 10px
+                .detail
+                    padding-left 30px
+            .modal-footer
+                .btn-primary
+                    border none
+                    outline none
+                    background-color #32c5d2
             .review_form
                 h4 
                     font-weight bold
