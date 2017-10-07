@@ -11,30 +11,30 @@
                   <li @click="switchContent(index, menuItem.value)" v-for="(menuItem, index) in sidemenu" :key="menuItem.id" :class="{active:activeMenu==index}">{{menuItem.title}}</li>                  
               </ul>
           </div>
-          <div class="col-md-9 col-md-offset-3" ref="reviewWrapper">
-              <ul v-show="!submitPage && review_list && review_list.length > 0">
-                  <li v-for="review in review_list" :key="review.id" class="review-item">
+          <div class="col-md-9 col-md-offset-3" ref="reviewWrapper">       
+              <ul v-if="review_list && review_list.length > 0" v-show="!submitPage">
+                  <li v-for="reviewItem in review_list" :key="reviewItem.id" class="review-item">
                       <div class="title">
-                          <span>{{review.title}}</span>                          
+                          <span>{{reviewItem.title}}</span>
                       </div>
                       <div class="tags">
                           <span class="glyphicon glyphicon-tags"></span>
-                          <span>{{review.article.sources}}</span>
-                          <span>{{review.article.classifications}}</span>
+                          <span>{{reviewItem.article.sources}}</span>
+                          <span>{{reviewItem.article.classifications}}</span>
                       </div>
                       <div class="article">
-                          <span><strong>文章：</strong>{{review.article.title}}</span>
-                          <span><strong>作者：</strong>{{review.article.author}}</span>
-                          <span v-if="review.article.link"><a :href="review.article.link" target="_blank">查看原文</a></span>
+                          <span><strong>文章：</strong>{{reviewItem.article.title}}</span>
+                          <span><strong>作者：</strong>{{reviewItem.article.author}}</span>
+                          <span v-if="reviewItem.article.link"><a :href="reviewItem.article.link" target="_blank">查看原文</a></span>
                       </div>
                       <div class="content">
-                          <p>{{review.content}}</p>
+                          <p>{{reviewItem.content}}</p>
                       </div>
                       <div class="time">
                           <span class="glyphicon glyphicon-time"></span>
-                          <span>{{review.post_date | dateFormat}}</span>
+                          <span>{{reviewItem.post_date | dateFormat}}</span>
                       </div>
-                      <button class="btn btn-info" @click="showDetail(review)">查看详情</button>
+                      <button class="btn btn-info" @click="showDetail(reviewItem)">查看详情</button>
                   </li>
               </ul>
               <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -61,7 +61,7 @@
                             </div>
                         </div>     
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-primary">编辑</button>
+                            <button type="button" class="btn btn-primary" @click="editReview(detail_review)">编辑</button>
                             <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                         </div>                   
                     </div>
@@ -234,13 +234,17 @@ export default {
     },
     filters: {
         dateFormat (value) {
-            return moment().format('YYYY-MM-DD HH:mm:ss') 
+            return moment(value).format('YYYY-MM-DD HH:mm:ss') 
         }
     },
     created() {
         this.user = JSON.parse(sessionStorage.getItem('user'));                
-        this.switchContent(0, 'all');     
-    },    
+    },
+    mounted () {
+        this.$nextTick(function (){
+            this.switchContent(0, 'all');
+        })
+    },
     methods: {
         switchContent (i, v) {
             this.activeMenu = i;
@@ -248,6 +252,7 @@ export default {
                 this.submitPage = true;
             } else {
                 this.submitPage = false;
+                this.review = this.empty_review;
                 this.$http.post(config.apiHost+'/findAllReviews', {user_id: this.user._id, type: v}).then(response => {
                     var data = response.body;
                     if(data.status!=1){
@@ -255,7 +260,7 @@ export default {
                         this.showAlert = true;
                     }else{
                         this.$nextTick(function () {
-                            this.review_list = data.data;                            
+                            this.review_list = data.data;
                         })
                     }                
                 }, response => {
@@ -266,32 +271,58 @@ export default {
             }
             
         },
-        submit () {
-            this.review.user_id = this.user._id;
-            this.$http.post(config.apiHost+'/addReview', this.review).then(response => {
-                var data = response.body;
-                this.showAlert = true;
-                this.alertMessage = data.message;
-                if(data.status!=1){
-                    this.submitSuccess = false;
-                }else{
-                    this.submitSuccess = true;
-                    this.review = this.empty_review;
-                    this.switchContent(0, 'all');
-                }
+        submit () {            
+            if (!this.review._id) {
+                //添加
+                this.review.user_id = this.user._id;
+                this.$http.post(config.apiHost+'/addReview', this.review).then(response => {
+                    var data = response.body;
+                    this.showAlert = true;
+                    this.alertMessage = data.message;
+                    if(data.status!=1){
+                        this.submitSuccess = false;
+                    }else{
+                        this.submitSuccess = true;
+                        this.review = this.empty_review;
+                        this.switchContent(0, 'all');
+                    }
+                
+                }, response => {
+                    // error callback 
+                    this.alertMessage = "提交失败，请稍微再试！";
+                });
+            } else {
+                //编辑
+                this.$http.post(config.apiHost+'/updateReview', {id: this.review._id}).then(response => {
+                    var data = response.body;
+                    this.showAlert = true;
+                    this.alertMessage = data.message;
+                    if(data.status!=1){
+                        this.submitSuccess = false;
+                    }else{
+                        this.submitSuccess = true;
+                        this.review = this.empty_review;
+                        this.switchContent(0, 'all');
+                    }
+                
+                }, response => {
+                    // error callback 
+                    this.alertMessage = "编辑失败，请稍微再试！";
+                });
+            }
             
-            }, response => {
-                // error callback 
-                this.alertMessage = "提交失败，请稍微再试！";
-            });
         },
         hideAlert () {
             this.showAlert = false;
         },
         showDetail (review) {
-            // alert(review.title);
             this.detail_review = review;
-            $('#myModal').modal('show')
+            $('#myModal').modal('show');
+        },
+        editReview (old_review) {
+            $('#myModal').modal('hide');
+            this.submitPage = true;
+            this.review = old_review;
         }
     }
 }
