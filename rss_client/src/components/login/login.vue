@@ -69,7 +69,7 @@ export default {
                     this.showAlert = true;
                 }else{
                     this.showAlert = false;
-                    sessionStorage.setItem('user', data.data);
+                    sessionStorage.setItem('user', JSON.stringify(data.data));
                     this.$router.push('home')
                 }
                 this.formSubmit = false;

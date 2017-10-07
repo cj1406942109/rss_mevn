@@ -1,17 +1,28 @@
 <template>
     <div class="home">
+        <my-nav></my-nav>
+        <div class="container">
+            <div class="row">                
+                <div class="col-md-12">
+                    
+                </div>
+            </div>
+        </div>
         
     </div>
 </template>
 
 <script>
-export default {
-  
-}
+    import myNav from '@/components/nav/nav';
+    export default {
+        components: {
+            myNav
+        }
+    }
 </script>
 
 <style lang="stylus" scoped>
-    .home
-        height 800px
+    .container
+        margin-top 50px        
 </style>
 

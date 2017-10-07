@@ -6,6 +6,9 @@ import router from './router';
 import VueResource from 'vue-resource';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
+import jQuery from 'jquery';
+import 'bootstrap/dist/js/bootstrap.min.js';
+
 Vue.config.productionTip = false;
 Vue.use(VueResource);
 /* eslint-disable no-new */
