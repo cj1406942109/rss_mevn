@@ -10,12 +10,11 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <router-link to="/home" class="navbar-brand">RSS</router-link>
+                    <a class="navbar-brand">RSS</a>
                 </div>               
                 <div class="collapse navbar-collapse" id="example-navbar-collapse">
                     <ul class="nav navbar-nav">
-                        <li><router-link to="/review">读后感</router-link></li>
-			            <li><router-link to="/sys_push">我的推送</router-link></li>
+                        <li v-for="nav in navList" :key="nav.id"><router-link :to="nav.href">{{nav.title}}</router-link></li>
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
                         <li class="dropdown">
@@ -38,22 +37,34 @@
 export default {
     data () {
         return {
-            user: JSON.parse(sessionStorage.getItem('user'))
+            navList: [{
+                title:'读后感',
+                href:'/home/review_list',
+            },{
+                title:'我的推送',
+                href:'/home/sys_push',
+            }],
+            user: ''
         }
+    },
+    created () {
+        this.user = JSON.parse(sessionStorage.getItem('user'));
     },
     methods: {
         logout () {
             sessionStorage.removeItem('user');
-            this.$router.push('login');
+            this.$router.push('/login');
         }
     }
 }
 </script>
 
-<style lang="stylus" scoped>
-    .navbar-inverse
+<style lang="stylus" scoped>    
+    .navbar-inverse    
         background-color #2B3643
         border-color #2B3643
+        .navbar-brand
+            color #ffffff
         .navbar-toggle
             border-color #ccc
             &:hover
@@ -62,9 +73,11 @@ export default {
         .open
         .active
             a
+                cursor pointer
                 &:hover
                 &:active
                 &:visited
                     background-color #3F4F62
+                    color #fff
 </style>
 

@@ -3,12 +3,13 @@
         <my-nav></my-nav>
         <div class="container">
             <div class="row">                
-                <div class="col-md-12">
-                    
+                <div class="col-md-12">                
+                    <keep-alive>
+                        <router-view></router-view>
+                    </keep-alive>
                 </div>
             </div>
-        </div>
-        
+        </div>        
     </div>
 </template>
 

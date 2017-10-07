@@ -86,7 +86,7 @@ export default {
                     this.redirecting = true;
                     var router = this.$router;
                     setTimeout(function(){
-                        router.push('login');
+                        router.push('/login');
                     },1000);
                 }
                 this.formSubmit = false;

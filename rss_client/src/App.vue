@@ -1,9 +1,7 @@
 <template>
   <div id="app">
     <transition>
-      <keep-alive>
-        <router-view></router-view>
-      </keep-alive>
+      <router-view></router-view>
     </transition>
   </div>
 </template>
@@ -14,6 +12,8 @@ export default {
 }
 </script>
 
-<style lang="stylus" scoped>
-
+<style lang="stylus">
+#app
+  .router-link-exact-active
+    color #32c5d2
 </style>

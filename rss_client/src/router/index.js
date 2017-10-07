@@ -3,6 +3,8 @@ import Router from 'vue-router'
 import login from '@/components/login/login'
 import register from '@/components/register/register'
 import home from '@/components/home/home'
+import reviewList from '@/components/review_list/review_list'
+import sysPush from '@/components/sys_push/sys_push'
 
 Vue.use(Router)
 
@@ -16,11 +18,26 @@ var router = new Router({
         component: login
     }, {
         path: '/home',
-        name: 'home',
         meta: {
             requireAuth: true
         },
-        component: home
+        component: home,
+        children: [{
+            path: '',
+            redirect: 'review_list'
+        }, {
+            path: 'review_list',
+            meta: {
+                requireAuth: true
+            },
+            component: reviewList
+        }, {
+            path: 'sys_push',
+            meta: {
+                requireAuth: true
+            },
+            component: sysPush
+        }]
     }, {
         path: '/register',
         name: 'register',
