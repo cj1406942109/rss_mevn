@@ -25,7 +25,7 @@
                       <div class="article">
                           <span><strong>文章：</strong>{{review.article.title}}</span>
                           <span><strong>作者：</strong>{{review.article.author}}</span>
-                          <span v-if="review.article.link"><a :href="review.article.link">查看原文</a></span>
+                          <span v-if="review.article.link"><a :href="review.article.link" target="_blank">查看原文</a></span>
                       </div>
                       <div class="content">
                           <p>{{review.content}}</p>
