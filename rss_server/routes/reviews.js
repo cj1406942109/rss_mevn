@@ -8,9 +8,9 @@ const STATUS_OK = 1;
 //根据用户id获取所有读后感
 router.post('/findAllReviews', function(req, res, next) {
     var queryObject = { user_id: req.body.user_id };
-    if(req.body.type=='all'){
-        
-    }else if(req.body.type == 'like'){
+    if(req.body.type == 'all') {
+
+    } else if(req.body.type == 'like') {
         queryObject = { user_id: req.body.user_id, is_like: true };
     }
     Review.find(queryObject)
@@ -69,13 +69,19 @@ router.post('/addReview', (req, res) => {
 });
 //更新读后感信息
 router.post('/updateReview', (req, res) => {
-    Review.findOneAndUpdate({ _id: req.body.id }, {
+    var new_review = req.body;
+    Review.updateOne({ _id: new_review._id }, {
             $set: {
-                title: req.body.title,
-                intro: req.body.intro,
-                detail: req.body.detail,
-                article: req.body.article,
-                is_like: req.body.is_like
+                title: new_review.title,
+                intro: new_review.intro,
+                detail: new_review.detail,
+                "article.title": new_review.article.title,
+                "article.author": new_review.article.author,
+                "article.link": new_review.article.link,
+                "article.content": new_review.article.content,
+                "article.sources": new_review.article.sources,
+                "article.classifications": new_review.article.classifications,
+                is_like: new_review.is_like
             }
         }, {
             new: true //返回更新后的文档，默认为更新前的文档
@@ -87,7 +93,7 @@ router.post('/updateReview', (req, res) => {
         }))
         .catch(err => res.json({
             'status': STATUS_ERR,
-            'message': '更新失败，请稍微重试！',
+            'message': '更新失败，请稍后重试！',
             'data': err
         }));
 });
@@ -103,7 +109,7 @@ router.post('/deleteReview', (req, res) => {
         }))
         .catch(err => res.json({
             'status': STATUS_ERR,
-            'message': '删除失败，请稍微重试！',
+            'message': '删除失败，请稍后重试！',
             'data': err
         }));
 })

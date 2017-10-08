@@ -229,7 +229,7 @@ export default {
     },
     computed: {
         formValid: function () {            
-            return this.review.article.title && this.review.article.author && this.review.article.sources && this.review.article.classifications && this.review.title && this.review.is_like;
+            return this.review.article.title && this.review.article.author && this.review.article.sources && this.review.article.classifications && this.review.title && this.review.is_like.toString()!='';
         }
     },
     filters: {
@@ -289,11 +289,11 @@ export default {
                 
                 }, response => {
                     // error callback 
-                    this.alertMessage = "提交失败，请稍微再试！";
+                    this.alertMessage = "提交失败，请稍后重试！";
                 });
             } else {
                 //编辑
-                this.$http.post(config.apiHost+'/updateReview', {id: this.review._id}).then(response => {
+                this.$http.post(config.apiHost+'/updateReview', this.review).then(response => {
                     var data = response.body;
                     this.showAlert = true;
                     this.alertMessage = data.message;
@@ -307,7 +307,7 @@ export default {
                 
                 }, response => {
                     // error callback 
-                    this.alertMessage = "编辑失败，请稍微再试！";
+                    this.alertMessage = "编辑失败，请稍后重试！";
                 });
             }
             
@@ -321,7 +321,7 @@ export default {
         },
         editReview (old_review) {
             $('#myModal').modal('hide');
-            this.submitPage = true;
+            this.switchContent(2, -1);
             this.review = old_review;
         }
     }
