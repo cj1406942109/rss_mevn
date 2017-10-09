@@ -51,7 +51,7 @@
                                 <p><label>作者：</label>{{detail_review.article.author}}</p>
                                 <p><label>来源：</label>{{detail_review.article.sources}}</p>
                                 <p><label>分类：</label>{{detail_review.article.classifications}}</p>
-                                <p v-if="detail_review.article.link"><label>原文链接：</label>{{detail_review.article.link}}</p>
+                                <p v-if="detail_review.article.link" style="word-break:break-all"><label>原文链接：</label>{{detail_review.article.link}}</p>
                                 <p v-if="detail_review.article.content"><label>文章内容：</label>{{detail_review.article.content}}</p>
                             </div>
                             <h4>我的读后感</h4>
