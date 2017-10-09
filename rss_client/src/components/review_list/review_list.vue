@@ -5,13 +5,13 @@
               <button type="button" class="close" data-dismiss="alert" aria-label="Close" @click="hideAlert"><span aria-hidden="true">&times;</span></button>
               {{alertMessage}}
           </div>
-          <div class="col-md-3 affix">
+          <div class="col-md-3">
               <h3>读后感</h3>
               <ul>
                   <li @click="switchContent(index, menuItem.value)" v-for="(menuItem, index) in sidemenu" :key="menuItem.id" :class="{active:activeMenu==index}">{{menuItem.title}}</li>                  
               </ul>
           </div>
-          <div class="col-md-9 col-md-offset-3" ref="reviewWrapper">       
+          <div class="col-md-9" ref="reviewWrapper">       
               <ul v-if="review_list && review_list.length > 0" v-show="!submitPage">
                   <li v-for="reviewItem in review_list" :key="reviewItem.id" class="review-item">
                       <div class="title">
@@ -332,9 +332,8 @@ export default {
     .review-list
         padding 20px 0
         .col-md-3
-            padding 50px 0 100px
+            padding 50px 0 20px
             background-color #ffffff
-            min-height 500px
             h3
                 margin 20px 0
                 font-size 20px

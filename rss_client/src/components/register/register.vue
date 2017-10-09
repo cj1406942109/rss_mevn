@@ -110,6 +110,9 @@ export default {
         width 100%
         height 100%        
         background-color rgb(54,65,80)
+        display flex
+        flex-direction column
+        justify-content space-around
         .register-bg1
             z-index -99
             position absolute
@@ -130,8 +133,10 @@ export default {
             background-color rgba(54,65,80,0.5)
         .register-content            
             text-align center
-            padding 120px
+            margin 0 20px
+            flex 1
             h1
+                margin-top -100px
                 color #fff
             .register-form
                 border-radius 5px 5px 0 0

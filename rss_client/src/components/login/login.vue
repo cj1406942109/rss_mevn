@@ -3,7 +3,7 @@
         <div class="login-bg1"></div>
         <div class="login-bg2"></div>
         <div class="row">            
-            <div class="col-md-4 col-md-offset-4">
+            <div class="col-sm-4 col-sm-offset-4">
                 <div class="login-content">
                     <h1>RSS</h1>
                     <form action="javascript:;" class="login-form" method="post">                        
@@ -93,6 +93,9 @@ export default {
         width 100%
         height 100%        
         background-color rgb(54,65,80)
+        display flex
+        flex-direction column
+        justify-content space-around
         .login-bg1
             position absolute
             top 0
@@ -112,8 +115,10 @@ export default {
             background-color rgba(54,65,80,0.5)
         .login-content            
             text-align center
-            padding 150px 120px
+            margin 0 20px
+            flex 1
             h1
+                margin-top -100px
                 color #fff
             .login-form
                 border-radius 5px 5px 0 0
