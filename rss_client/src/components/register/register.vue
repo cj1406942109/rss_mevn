@@ -141,7 +141,7 @@ export default {
             margin 0 20px
             flex 1
             h1
-                margin-top -100px
+                margin-top -50px
                 color #fff
             .register-form
                 border-radius 5px 5px 0 0
