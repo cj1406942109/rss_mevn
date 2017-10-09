@@ -30,7 +30,7 @@ public class reviewAnalyse {
 	}
 
 	public void analyse() {
-		// 先查找label表，判断当前用户在label表中是否存在，如果不存在就新建一个用户
+		// 先查找label表，判断当前用户在label表中是否存在，如果不存在就新建一个用户label表
 		BasicDBObject query = new BasicDBObject("user_id", this.user_id);
 		if (dbHelper.FindDocumentsBy("user_label_classification", query).size() == 0) {
 			// 分别在两个label表中插入字段，初始值为0.5
@@ -75,9 +75,8 @@ public class reviewAnalyse {
 							.append("author", (String)article.get("author"))
 							.append("classification", (String)article.get("classification"))
 							.append("sources", (String)article.get("sources"))
-							// 要改
-							.append("link", "")
-							.append("content", "")
+							.append("link", (String)article.get("link"))
+							.append("content", (String)article.get("content"))
 							.append("pulled_user", Arrays.asList(user_id));
 					insertArticleDocuments.add(document);
 				}
@@ -176,6 +175,8 @@ public class reviewAnalyse {
 			if (!isFind)
 				this.analyseResult = resultArticle.get(i);
 		}
+		if(this.analyseResult == null)
+			return;
 		String articleTitle = (String) this.analyseResult.get("article_title");
 		List<String> pulleduserList = ((ArrayList<String>)(this.analyseResult.get("pulled_user")));
 		pulleduserList.add(user_id);
