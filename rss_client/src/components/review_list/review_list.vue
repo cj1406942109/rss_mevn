@@ -135,7 +135,7 @@
                               </div>
                           </div>                                           
                           <div class="form-group">
-                            <label class="col-md-2 control-label">详细内容</label>
+                            <label class="col-md-2 control-label">详细内容<span class="required">&nbsp;*</span></label>
                             <div class="col-md-8">
                                 <textarea rows="6" class="form-control" v-model="review.content"></textarea>
                             </div>
@@ -229,7 +229,7 @@ export default {
     },
     computed: {
         formValid: function () {            
-            return this.review.article.title && this.review.article.author && this.review.article.sources && this.review.article.classifications && this.review.title && this.review.is_like.toString()!='';
+            return this.review.article.title && this.review.article.author && this.review.article.sources && this.review.article.classifications && this.review.title && this.review.is_like.toString()!='' && this.review.content;
         }
     },
     filters: {
@@ -252,7 +252,8 @@ export default {
                 this.submitPage = true;
             } else {
                 this.submitPage = false;
-                this.review = this.empty_review;
+                //此处使用=赋值，或者使用Object.assign()赋值都会导致两个对象互相绑定，修改review的值，empty_review的值会跟着改变
+                // this.review = JSON.parse(JSON.stringify(this.empty_review));
                 this.$http.post(config.apiHost+'/findAllReviews', {user_id: this.user._id, type: v}).then(response => {
                     var data = response.body;
                     if(data.status!=1){
@@ -283,7 +284,8 @@ export default {
                         this.submitSuccess = false;
                     }else{
                         this.submitSuccess = true;
-                        this.review = this.empty_review;
+                        //此处使用=赋值，或者使用Object.assign()赋值都会导致两个对象互相绑定，修改review的值，empty_review的值会跟着改变
+                        this.review = JSON.parse(JSON.stringify(this.empty_review));
                         this.switchContent(0, 'all');
                     }
                 
@@ -301,7 +303,8 @@ export default {
                         this.submitSuccess = false;
                     }else{
                         this.submitSuccess = true;
-                        this.review = this.empty_review;
+                        //此处使用=赋值，或者使用Object.assign()赋值都会导致两个对象互相绑定，修改review的值，empty_review的值会跟着改变
+                        this.review = JSON.parse(JSON.stringify(this.empty_review));
                         this.switchContent(0, 'all');
                     }
                 
