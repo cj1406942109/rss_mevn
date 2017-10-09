@@ -29,7 +29,7 @@
                                 <input v-model="user.password" class="form-control" type="password" autocomplete="off" placeholder="密码（6-16位字符）" name="password">
                             </div>
                             <div class="form-group col-sm-12">
-                                <input v-model="re_password" class="form-control" type="password" autocomplete="off" placeholder="确认密码" name="password">
+                                <input @keyup="enterKey($event)" v-model="re_password" class="form-control" type="password" autocomplete="off" placeholder="确认密码" name="password">
                             </div>
                         </div>
                         <div class="row">
@@ -99,6 +99,11 @@ export default {
         },
         hideAlert() {
             this.showAlert = false;
+        },
+        enterKey (event) {
+            if(event.keyCode==13 && this.formValid && !this.formSubmit){
+              this.submitForm();
+            }
         }
     }
 }
