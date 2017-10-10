@@ -1,6 +1,7 @@
 package servlet;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -23,6 +24,8 @@ public class RssServlet extends HttpServlet {
 
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		req.setCharacterEncoding("utf-8");
+		resp.setCharacterEncoding("utf-8");
+		resp.setHeader("Access-Control-Allow-Headers", "x-requested-with,content-type");
 		String user_id = req.getParameterValues("user_id")[0];
 		reviewAnalyse reviewResult = new reviewAnalyse();
 		Document articleResult = reviewResult.run(user_id);
@@ -31,13 +34,22 @@ public class RssServlet extends HttpServlet {
 		Document toFront = new Document();
 		if (articleResult == null) {
 			status = 0;
-			message = "文章没有啦！请耐心等待管理员导入新文章";
-			System.out.println("文章没有啦！请耐心等待管理员导入新文章");
+			message = "There aren't any articles anymore, :)";
+			System.out.println("There aren't any articles anymore, :)");
+			toFront.append("status", status).append("message", message).append("data", "");
 		} else {
 			status = 1;
 			message = "successful";
 			System.out.println(articleResult.toJson());
+			toFront.append("status", status).append("message", message).append("data", articleResult);
 		}
-		toFront.append("status", status).append("message", message).append("data", reviewResult);
+		try {
+			PrintWriter out = resp.getWriter();
+			out.print(toFront.toJson().toString());
+			out.flush();
+			out.close();
+		}catch(Exception e) {
+			
+		}
 	}
 }

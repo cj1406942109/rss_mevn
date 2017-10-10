@@ -130,8 +130,8 @@ public class reviewAnalyse {
 		BasicDBObject query = new BasicDBObject("user_id", user_id);
 		Set<String> key_classi = dbHelper.FindDocumentsBy("user_label_classification", query).get(0).keySet();
 		Set<String> key_sour = dbHelper.FindDocumentsBy("user_label_resource", query).get(0).keySet();
-		double[] classiMatrix = new double[key_classi.size() - 1];
-		double[] sourMatrix = new double[key_sour.size() - 1];
+		double[] classiMatrix = new double[key_classi.size() - 2];
+		double[] sourMatrix = new double[key_sour.size() - 2];
 		double[][] resultMatrix = new double[classiMatrix.length][sourMatrix.length];
 		
 		for (int i = 2; i < key_classi.toArray().length; i++) {
@@ -163,8 +163,11 @@ public class reviewAnalyse {
 		query = new BasicDBObject("classification", (String) key_classi.toArray()[i_index + 2])
 				.append("sources", (String) key_sour.toArray()[j_index + 2]);
 		List<Document> resultArticle = dbHelper.FindDocumentsBy("article", query);
-		boolean isFind = false;
+		//错误改动
+		//boolean isFind = false;
+		
 		for (int i = 0; i < resultArticle.size(); i++) {
+			boolean isFind = false;
 			List<String> pulled_user = (List<String>) resultArticle.get(i).get("pulled_user");
 			for (int j = 0; j < pulled_user.size(); j++) {
 				if (user_id.equals(pulled_user.get(j))) {
@@ -172,8 +175,15 @@ public class reviewAnalyse {
 					break;
 				}
 			}
+//			if(isFind) {
+//				continue;
+//			}
+//			else {
+//				this.analyseResult = resultArticle.get(i);
+//				break;
+//			}
 			if (!isFind)
-				this.analyseResult = resultArticle.get(i);
+			this.analyseResult = resultArticle.get(i);
 		}
 		if(this.analyseResult == null)
 			return;

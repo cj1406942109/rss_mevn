@@ -20,10 +20,10 @@ public class MongoDBHelper implements IMongoDBHelper {
 	public MongoDBHelper() {
 		try {
 			// 连接到 mongodb 服务
-			mongoClient = new MongoClient("localhost", 27017);
+			mongoClient = new MongoClient("116.62.148.24", 27017);
 
 			// 连接到数据库
-			mongoDatabase = mongoClient.getDatabase("rss");
+			mongoDatabase = mongoClient.getDatabase("rss_mevn");
 			// System.out.println("Connect to database successfully");
 		} catch (Exception e) {
 
