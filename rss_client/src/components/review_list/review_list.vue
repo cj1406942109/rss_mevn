@@ -100,13 +100,13 @@
                                   </label>
                               </div>
                           </div>
-                          <div class="form-group" v-if="review.article.link">
+                          <div class="form-group">
                             <label class="col-md-2 control-label">全文链接</label>
                             <div class="col-md-8">
                                 <input type="text" class="form-control" placeholder="如：https://www.baidu.com" v-model="review.article.link">
                             </div>
                           </div>
-                          <div class="form-group"  v-if="review.article.content">
+                          <div class="form-group">
                             <label class="col-md-2 control-label">文章内容</label>
                             <div class="col-md-8">
                                 <textarea rows="6" class="form-control" v-model="review.article.content"></textarea>
