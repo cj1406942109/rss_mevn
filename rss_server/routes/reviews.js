@@ -97,7 +97,7 @@ router.post('/updateReview', (req, res) => {
             'data': err
         }));
 });
-//删除用户
+//删除读后感
 router.post('/deleteReview', (req, res) => {
     Review.findOneAndRemove({
             _id: req.body.id

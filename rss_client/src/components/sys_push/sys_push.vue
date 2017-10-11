@@ -1,149 +1,88 @@
 <template>
-  <div class="review-list">
+  <div class="push-list">
       <div class="row">
-          <div class="alert" role="alert" :class="[submitSuccess?'alert-success':'alert-danger']" v-show="showAlert">
+          <div class="alert alert-danger" role="alert" v-show="showAlert">
               <button type="button" class="close" data-dismiss="alert" aria-label="Close" @click="hideAlert"><span aria-hidden="true">&times;</span></button>
               {{alertMessage}}
           </div>
           <div class="col-md-3">
-              <h3>系统推送</h3>
+              <h3>我的推送</h3>
               <ul>
-                  <li @click="switchContent(index, menuItem.value)" v-for="(menuItem, index) in sidemenu" :key="menuItem.id" :class="{active:activeMenu==index}">{{menuItem.title}}</li>                  
+                  <li @click="getNewPush(index)" v-for="(menuItem, index) in sidemenu" :key="menuItem.id" :class="{active:activeMenu==index}">{{menuItem.title}}</li>                  
               </ul>
           </div>
-          <div class="col-md-9" ref="reviewWrapper">       
-              <ul v-if="review_list && review_list.length > 0" v-show="!submitPage">
-                  <li v-for="reviewItem in review_list" :key="reviewItem.id" class="review-item">
+          <div class="col-md-9" ref="pushWrapper">       
+              <ul v-if="push_list && push_list.length > 0">
+                  <li v-for="pushItem in push_list" :key="pushItem.id" class="push-item">
                       <div class="title">
-                          <span>{{reviewItem.title}}</span>
+                          <span>{{pushItem.article_title}}</span>
                       </div>
                       <div class="tags">
                           <span class="glyphicon glyphicon-tags"></span>
-                          <span>{{reviewItem.article.sources}}</span>
-                          <span>{{reviewItem.article.classifications}}</span>
+                          <span>{{pushItem.sources}}</span>
+                          <span>{{pushItem.classifications}}</span>
                       </div>
                       <div class="article">
-                          <span><strong>文章：</strong>{{reviewItem.article.title}}</span>
-                          <span><strong>作者：</strong>{{reviewItem.article.author}}</span>
-                          <span v-if="reviewItem.article.link"><a :href="reviewItem.article.link" target="_blank">查看原文</a></span>
+                          <span><strong>作者：</strong>{{pushItem.author}}</span>
+                          <span v-if="pushItem.link"><a :href="pushItem.link" target="_blank">查看原文</a></span>
                       </div>
-                      <div class="content">
-                          <p>{{reviewItem.content}}</p>
-                      </div>
-                      <div class="time">
-                          <span class="glyphicon glyphicon-time"></span>
-                          <span>{{reviewItem.post_date | dateFormat}}</span>
-                      </div>
-                      <button class="btn btn-info" @click="showDetail(reviewItem)">查看详情</button>
+                      <div class="content" v-if="pushItem.content">
+                          <p>{{pushItem.content}}</p>
+                      </div>                      
                   </li>
-              </ul>
-              <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title" id="myModalLabel">{{detail_review.title}}</h4>
-                        </div>
-                        <div class="modal-body">
-                            <h4>文章信息</h4>
-                            <div class="detail">
-                                <p><label>标题：</label>{{detail_review.article.title}}</p>
-                                <p><label>作者：</label>{{detail_review.article.author}}</p>
-                                <p><label>来源：</label>{{detail_review.article.sources}}</p>
-                                <p><label>分类：</label>{{detail_review.article.classifications}}</p>
-                                <p v-if="detail_review.article.link" style="word-break:break-all"><label>原文链接：</label>{{detail_review.article.link}}</p>
-                                <p v-if="detail_review.article.content"><label>文章内容：</label>{{detail_review.article.content}}</p>
-                            </div>
-                            <h4>我的读后感</h4>
-                            <div class="detail">
-                                <p><label v-if="detail_review.is_like==true" class="text-primary">推荐该文章</label><label v-else class="text-danger">不推荐该文章</label></p>
-                                <p v-if="detail_review.content"><label>详细内容：</label>{{detail_review.content}}</p>
-                            </div>
-                        </div>     
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                        </div>                   
-                    </div>
-                </div>
-              </div>
-              <div class="alert alert-info" style="margin-top:100px" role="alert" v-show="!submitPage && (!review_list || review_list.length==0)"><strong>暂无数据显示！</strong>你可以先提交读后感！</div>              
+              </ul>              
+              <div class="alert alert-info" style="margin-top:100px" role="alert" v-show="!push_list || push_list.length==0"><strong>暂无数据显示！</strong>你可以点击获取系统推送！</div>              
           </div>
       </div>
   </div>  
 </template>
 
 <script>
-// import BScroll from 'better-scroll';
-import moment from 'moment';
 import config from '@/config';
 export default {
     data() {
         return {            
-            empty_review: {
-                title: '', //读后感标题
-                content: '', //读后感内容
-                article: { //文章
-                    title: '', //文章标题
-                    author: '', //作者
-                    link: '', //链接地址
-                    content: '', //文章内容
-                    sources: '', //文章来源
-                    classifications: '' //文章分类
-                },
-                is_like: '', //是否推荐
-                is_new: true,
-                user_id: '' //用户id
-            },
-            review: {
-                title: '', //读后感标题
-                content: '', //读后感内容
-                article: { //文章
-                    title: '', //文章标题
-                    author: '', //作者
-                    link: '', //链接地址
-                    content: '', //文章内容
-                    sources: '', //文章来源
-                    classifications: '' //文章分类
-                },
-                is_like: '', //是否推荐
-                is_new: true,
-                user_id: '' //用户id
-            },
-            detail_review: {
-                title: '', //读后感标题
-                content: '', //读后感内容
-                article: { //文章
-                    title: '', //文章标题
-                    author: '', //作者
-                    link: '', //链接地址
-                    content: '', //文章内容
-                    sources: '', //文章来源
-                    classifications: '' //文章分类
-                },
-                is_like: '', //是否推荐
-                is_new: true,
-                user_id: '' //用户id
+            // "data" : { 
+            //     "_id" : { "$oid" : "59da276a31ad8a0de3762bfb" },
+            //     "article_id" : "60", 
+            //     "article_title" : "德国体育俱乐部体制与群众体育关系的研究", 
+            //     "author" : "刘波", 
+            //     "classification" : "体育",
+            //     "sources" : "期刊", 
+            //     "link" : "http://kns.cnki.net/kcms/detail/detail.aspx?filename=TYYK200901016&dbcode=CJFD&dbname=CJFD2009&v=",
+            //     "content" : "", 
+            //     "pulled_user" : ["1264846302@qq.com", "yx_test@126.com", "1406942109@qq.com", "123@qq.com"] 
+            // } ,            
+            new_push: {
+                article_id:'',
+                article_title:'',
+                author:'',
+                link:'',
+                content:'',
+                sources:'',
+                classification:'',
+                user_id:''
             },
             sidemenu: [{
                 title: '全部内容',
                 value: 'all'
             },{
-                title: '我的收藏',
-                value: 'like'
-            },{
                 title: '获取推送',
                 value: -1
             }],
-            review_list: [],            
+            push_list: [{
+                "article_id" : "60", 
+                "article_title" : "德国体育俱乐部体制与群众体育关系的研究", 
+                "author" : "刘波", 
+                "classification" : "体育",
+                "sources" : "期刊", 
+                "link" : "http://kns.cnki.net/kcms/detail/detail.aspx?filename=TYYK200901016&dbcode=CJFD&dbname=CJFD2009&v=",
+                "content" : "",
+            }],            
             activeMenu: 0,          //当前激活的sidemenu下标
             user: '',
             showAlert: false,
             alertMessage: ''
-        }
-    },    
-    filters: {
-        dateFormat (value) {
-            return moment(value).format('YYYY-MM-DD HH:mm:ss') 
         }
     },
     created() {
@@ -151,45 +90,72 @@ export default {
     },
     mounted () {
         this.$nextTick(function (){
-            this.switchContent(0, 'all');
+            this.getPushList(0);
         })
     },
     methods: {
-        switchContent (i, v) {
-            this.activeMenu = i;
-            if (v == -1) {
-
-            } else {
-                this.$http.post(config.apiHost+'/findAllReviews', {user_id: this.user._id, type: v}).then(response => {
+        getNewPush (i) {
+            if(i!=0){
+                //获取新推送
+                this.$http.post('http://116.62.148.24/RSS_Server/RssServlet', {user_id: this.user.email}).then(response => {
                     var data = response.body;
                     if(data.status!=1){
                         this.alertMessage = data.message;
                         this.showAlert = true;
                     }else{
                         this.$nextTick(function () {
-                            this.review_list = data.data;
+                            this.new_push.article_id = data.data.article_id;
+                            this.new_push.article_title = data.data.article_title;
+                            this.new_push.author = data.data.author;
+                            this.new_push.link = data.data.link;
+                            this.new_push.content = data.data.content;
+                            this.new_push.sources = data.data.sources;
+                            this.new_push.classification = data.data.classification;
+                            this.new_push.user_id = this.user._id;
+                            this.$http.post(config.apiHost+'/addPush', this.new_push).then(response => {
+                                var data = response.body;                      
+                                console.log(data);
+                                getPushList();
+                            }, response => {
+                                // error callback 
+                                console.log(response);
+                            });
                         })
-                    }                
+                    }
                 }, response => {
                     // error callback 
                     this.alertMessage = '获取数据失败，请稍后重试！';
                     this.showAlert = true;
                 });
             }
+            
+        },
+        getPushList () {
+            this.$http.post(config.apiHost+'/findAllPushes', {user_id: this.user._id}).then(response => {
+                var data = response.body;
+                if(data.status!=1){
+                    this.alertMessage = data.message;
+                    this.showAlert = true;
+                }else{
+                    this.$nextTick(function () {
+                        this.push_list = data.data;
+                    })
+                }                
+            }, response => {
+                // error callback 
+                this.alertMessage = '获取数据失败，请稍后重试！';
+                this.showAlert = true;
+            });
         },
         hideAlert () {
             this.showAlert = false;
-        },
-        showDetail (review) {
-            this.detail_review = review;
-            $('#myModal').modal('show');
         }
     }
 }
 </script>
 
 <style lang="stylus" scoped>
-    .review-list
+    .push-list
         padding 20px 0
         .col-md-3
             padding 50px 0 20px
@@ -226,7 +192,7 @@ export default {
             ul
                 list-style-type none
                 padding 0
-                .review-item 
+                .push-item 
                     position relative
                     padding 10px 20px
                     margin 20px 0
