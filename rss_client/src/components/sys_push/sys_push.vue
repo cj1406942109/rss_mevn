@@ -54,7 +54,7 @@ export default {
             //     "pulled_user" : ["1264846302@qq.com", "yx_test@126.com", "1406942109@qq.com", "123@qq.com"] 
             // } ,            
             new_push: {
-                article_id:'',
+                article_id:'111',
                 article_title:'',
                 author:'',
                 link:'',
@@ -95,38 +95,77 @@ export default {
     },
     methods: {
         getNewPush (i) {
+            var vue = this;            
             if(i!=0){
                 //获取新推送
-                this.$http.post('http://116.62.148.24/RSS_Server/RssServlet', {user_id: this.user.email}).then(response => {
-                    var data = response.body;
-                    if(data.status!=1){
-                        this.alertMessage = data.message;
-                        this.showAlert = true;
-                    }else{
-                        this.$nextTick(function () {
-                            this.new_push.article_id = data.data.article_id;
-                            this.new_push.article_title = data.data.article_title;
-                            this.new_push.author = data.data.author;
-                            this.new_push.link = data.data.link;
-                            this.new_push.content = data.data.content;
-                            this.new_push.sources = data.data.sources;
-                            this.new_push.classification = data.data.classification;
-                            this.new_push.user_id = this.user._id;
-                            this.$http.post(config.apiHost+'/addPush', this.new_push).then(response => {
+                // alert('hello');
+                $.ajax({
+                    url: 'http://116.62.148.24/RSS_Server/RssServlet',
+                    data: {
+                        user_id: vue.user.email
+                    },
+                    type: "POST",
+                    success: function(data) {
+                        console.log(data);
+                        data = JSON.parse(data);
+                        if(data.status!=1){
+                            vue.alertMessage = data.message;
+                            vue.showAlert = true;
+                        }else{
+                            var push = data.data;
+                            vue.new_push.article_id = push.article_id;
+                            vue.new_push.article_title = push.article_title;
+                            vue.new_push.author = push.author;
+                            vue.new_push.link = push.link;
+                            vue.new_push.content = push.content;
+                            vue.new_push.sources = push.sources;
+                            vue.new_push.classification = push.classification;
+                            vue.new_push.user_id = vue.user._id;
+                            vue.$http.post(config.apiHost+'/addPush', vue.new_push).then(response => {
                                 var data = response.body;                      
-                                console.log(data);
-                                getPushList();
+                                // console.log(data);
+                                vue.getPushList();
                             }, response => {
                                 // error callback 
                                 console.log(response);
-                            });
-                        })
+                            });                            
+                        }
+                    },
+                    error: function(data) {
+                        vue.alertMessage = '获取数据失败，请稍后重试！';
+                        vue.showAlert = true;
                     }
-                }, response => {
-                    // error callback 
-                    this.alertMessage = '获取数据失败，请稍后重试！';
-                    this.showAlert = true;
-                });
+                })
+                // this.$http.post('http://116.62.148.24/RSS_Server/RssServlet', {user_id: this.user.email}).then(response => {
+                //     var data = response.body;
+                //     if(data.status!=1){
+                //         this.alertMessage = data.message;
+                //         this.showAlert = true;
+                //     }else{
+                //         this.$nextTick(function () {
+                //             this.new_push.article_id = data.data.article_id;
+                //             this.new_push.article_title = data.data.article_title;
+                //             this.new_push.author = data.data.author;
+                //             this.new_push.link = data.data.link;
+                //             this.new_push.content = data.data.content;
+                //             this.new_push.sources = data.data.sources;
+                //             this.new_push.classification = data.data.classification;
+                //             this.new_push.user_id = this.user._id;
+                //             this.$http.post(config.apiHost+'/addPush', this.new_push).then(response => {
+                //                 var data = response.body;                      
+                //                 console.log(data);
+                //                 getPushList();
+                //             }, response => {
+                //                 // error callback 
+                //                 console.log(response);
+                //             });
+                //         })
+                //     }
+                // }, response => {
+                //     // error callback 
+                //     this.alertMessage = '获取数据失败，请稍后重试！';
+                //     this.showAlert = true;
+                // });
             }
             
         },
