@@ -28,14 +28,6 @@ public class RssServlet extends HttpServlet {
 		//resp.setHeader("Access-Control-Allow-Headers", "");
 		
 		// 设置：Access-Control-Allow-Origin头，处理Session问题
-//        resp.setHeader("Access-Control-Allow-Origin", resp.getHeader("Origin"));
-//        resp.setHeader("Access-Control-Allow-Credentials", "true");
-//        resp.setHeader("P3P", "CP=CAO PSA OUR");
-//        if (req.getHeader("Access-Control-Request-Method") != null && "OPTIONS".equals(req.getMethod())) {
-//        	resp.addHeader("Access-Control-Allow-Methods", "POST,GET,TRACE,OPTIONS");
-//        	resp.addHeader("Access-Control-Allow-Headers", "Content-Type,Origin,Accept");
-//        	resp.addHeader("Access-Control-Max-Age", "120");
-//        }
 		resp.setHeader("Access-Control-Allow-Origin", "*");
 		resp.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
 		resp.setHeader("Access-Control-Max-Age", "3600");

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.bson.Document;
+import org.bson.types.ObjectId;
 
 import com.mongodb.BasicDBObject;
 
@@ -43,9 +44,11 @@ public class reviewAnalyse {
 			dbHelper.InsertDocuments("user_label_resource", insert);
 		}
 		// 查询review表判断是否有新读后感,创建查询条件： user_id = user_id && is_new = true
-		query = new BasicDBObject("user_id", this.user_id).append("is_new", true);
+		query = new BasicDBObject("email", this.user_id);
+		ObjectId userObjectId = dbHelper.FindDocumentsBy("users", query).get(0).getObjectId("_id");
+		query = new BasicDBObject("user_id", userObjectId).append("is_new", true);
 		// 根据查询条件查询判断是否存在新的读后感
-		List<Document> documents = dbHelper.FindDocumentsBy("review", query);
+		List<Document> documents = dbHelper.FindDocumentsBy("reviews", query);
 		List<Document> insertArticleDocuments = new ArrayList<Document>();
 		List<Document> insertUserLabelDocuments = new ArrayList<Document>();
 		// 获取当前article表中已经有多少个元素了，用于插入新的文章时增加id用
@@ -82,12 +85,12 @@ public class reviewAnalyse {
 				}
 
 				// 根据提取的读后感更新用户label表
-				updateLabel(user_id, (String) article.get("classification"),
+				updateLabel(this.user_id, (String) article.get("classifications"),
 						(String) article.get("sources"), (boolean) documents.get(i).get("is_like"));
 			}
-			query = new BasicDBObject("user_id", this.user_id).append("is_new", true);
+			query = new BasicDBObject("user_id", userObjectId).append("is_new", true);
 			BasicDBObject result = new BasicDBObject("is_new", false);
-			dbHelper.updateDocuments("review", query, result);
+			dbHelper.updateDocuments("reviews", query, result);
 			dbHelper.InsertDocuments("article", insertArticleDocuments);
 		}
 		
@@ -97,7 +100,8 @@ public class reviewAnalyse {
 	//更新标签
 	public void updateLabel(String user_id, String classification, String sources, boolean isLike) {
 		// 设置搜索依据——user_id
-		BasicDBObject query = new BasicDBObject("user_id", user_id);
+		System.out.println(this.user_id);
+		BasicDBObject query = new BasicDBObject("user_id", this.user_id);
 
 		// 获取isLike信息
 		// double类型，0代表不喜欢，1代表非常喜欢
