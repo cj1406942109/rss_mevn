@@ -94,7 +94,7 @@ public class reviewAnalyse {
 		cal();
 		// 否则进行标签匹配推送
 	}
-
+	//更新标签
 	public void updateLabel(String user_id, String classification, String sources, boolean isLike) {
 		// 设置搜索依据——user_id
 		BasicDBObject query = new BasicDBObject("user_id", user_id);
@@ -130,6 +130,7 @@ public class reviewAnalyse {
 		BasicDBObject query = new BasicDBObject("user_id", user_id);
 		Set<String> key_classi = dbHelper.FindDocumentsBy("user_label_classification", query).get(0).keySet();
 		Set<String> key_sour = dbHelper.FindDocumentsBy("user_label_resource", query).get(0).keySet();
+		//将标签表转化为矩阵
 		double[] classiMatrix = new double[key_classi.size() - 2];
 		double[] sourMatrix = new double[key_sour.size() - 2];
 		double[][] resultMatrix = new double[classiMatrix.length][sourMatrix.length];
@@ -146,7 +147,7 @@ public class reviewAnalyse {
 		int i_index = 0;
 		int j_index = 0;
 		double temp = 0;
-
+		//矩阵相乘并取最大值
 		for (int i = 0; i < classiMatrix.length; i++) {
 			for (int j = 0; j < sourMatrix.length; j++) {
 				resultMatrix[i][j] = classiMatrix[i] * sourMatrix[j];
@@ -159,12 +160,10 @@ public class reviewAnalyse {
 		}
 		
 		System.out.println(i_index+"  "+j_index+" "+temp);
-
+		//匹配文章，搜索用户没有读过的文章
 		query = new BasicDBObject("classification", (String) key_classi.toArray()[i_index + 2])
 				.append("sources", (String) key_sour.toArray()[j_index + 2]);
 		List<Document> resultArticle = dbHelper.FindDocumentsBy("article", query);
-		//错误改动
-		//boolean isFind = false;
 		
 		for (int i = 0; i < resultArticle.size(); i++) {
 			boolean isFind = false;
@@ -175,16 +174,11 @@ public class reviewAnalyse {
 					break;
 				}
 			}
-//			if(isFind) {
-//				continue;
-//			}
-//			else {
-//				this.analyseResult = resultArticle.get(i);
-//				break;
-//			}
+
 			if (!isFind)
 			this.analyseResult = resultArticle.get(i);
 		}
+		//返回结果
 		if(this.analyseResult == null)
 			return;
 		String articleTitle = (String) this.analyseResult.get("article_title");
